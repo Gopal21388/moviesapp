@@ -34,9 +34,14 @@ export const login = async (email, password) => {
 }
 
 export const register = async (email, password) => {
+  
     try {
         const user = await createUserWithEmailAndPassword(auth, email, password);
+                   
         toast('Registration Successful',
+          
+            
+            
         {
             icon: '👻',
             style: {

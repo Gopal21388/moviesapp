@@ -14,19 +14,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import { removeLikedMovie } from '../../store/Slice/movie-slice';
 
 const TrailerModal = ({movie,handleModal,isLiked,trailer}) => {
+    
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const [email,setEmail] = useState(undefined)
+    const [isLikedthumb, setIsLikedthumb] = useState(false);
+    const [isDislikedthumb, setIsDislikedthumb] = useState(false);
 
-    onAuthStateChanged(auth,(currentUser) => {
-        if(currentUser){
-            setEmail(currentUser.email)
-        }
-        else{
-            navigate('/login', {replace: true})
-        }
-    })
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            setEmail(user.email); 
+          } else {
+            navigate('/login');
+          }
+        });
+      
+        return () => unsubscribe(); 
+      }, []);
 
     const addToMovieLikedList = async () => {
         try{
@@ -76,6 +83,29 @@ const TrailerModal = ({movie,handleModal,isLiked,trailer}) => {
             }
         })
     }
+    const handleLikeTrailer = async () => {
+        await axios.post('http://localhost:5000/api/users/like-trailer', {
+          email,
+          trailer: movie,
+          rating: +1
+        });
+        toast("Liked trailer ✅");
+        setIsLikedthumb(true);
+        setIsDislikedthumb(false);
+      };
+      
+      const handleDislikeTrailer = async () => {
+        await axios.post('http://localhost:5000/api/users/dislike-trailer', {
+          email,
+          trailer: movie,
+            rating: -1
+        });
+        toast("Disliked trailer ❌");
+        setIsDislikedthumb(true);
+        setIsLikedthumb(false);
+        
+      };
+      
 
   return (
     <div className='overlay'>
@@ -94,8 +124,8 @@ const TrailerModal = ({movie,handleModal,isLiked,trailer}) => {
             <div className='overlay__content--info'>
                 <div className='overlay__content--info--icons '>
                     <IoPlayCircleSharp title="Play" onClick={playTrailer}  />
-                    <RiThumbUpFill title="Like"  />
-                    <RiThumbDownFill title="Dislike" />
+                    <RiThumbUpFill title="Like"  onClick={handleLikeTrailer} style={{ color: isLikedthumb ? 'green' : 'white' }}/>
+                    <RiThumbDownFill title="Dislike" onClick={handleDislikeTrailer} style={{ color: isDislikedthumb ? 'red' : 'white' }}/>
                     {isLiked ? (
                     <AiOutlineCheck title="Remove from List"  onClick={() => removeFromMovieLikedList}/>) : 
                     (<AiOutlinePlus title="Add to my list" onClick={addToMovieLikedList}  />)}
@@ -105,7 +135,7 @@ const TrailerModal = ({movie,handleModal,isLiked,trailer}) => {
                         <h3>{movie.name}</h3>
                         <p>{movie.overview}</p>
                     </div>
-                    <div className='overlay__content--info--descr--content'>
+                    <div className='overlay__content--info--descr--content'> 
                         <ul>
                             <li> Release Date : <span> {movie.release_date} </span> </li>
                             <li> Rating : <span> {movie.vote_average} </span> </li>

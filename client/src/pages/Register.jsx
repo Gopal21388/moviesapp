@@ -70,15 +70,18 @@ const inputs = [
   }
 
 
-const registerHandler =async (e) => {
+  const registerHandler =async (e) => {
     e.preventDefault()
     if(checkValues()){
-      await register(values.email,values.password)
-      navigate("/login" , {
+      await register(values.email,values.password);
+      
+      
+      navigate("/" , {
         replace : true
       })
     }
   }
+
   return (
     <div>
       <Background>
